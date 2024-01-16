@@ -24,7 +24,7 @@ const SignInForm = () => {
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
 
-  const { mutateAsync: signInAccount } = useSignInAccount();
+  const { mutateAsync: signInAccount, isPending } = useSignInAccount();
 
   const form = useForm<z.infer<typeof SignInValidation>>({
     resolver: zodResolver(SignInValidation),
@@ -34,11 +34,8 @@ const SignInForm = () => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof SignInValidation>) => {
-    const session = await signInAccount({
-      email: values.email,
-      password: values.password,
-    });
+  const handleSignIn = async (user: z.infer<typeof SignInValidation>) => {
+    const session = await signInAccount(user);
 
     if (!session) {
       return toast({ title: "Sign in failed. Please try again." });
@@ -49,7 +46,8 @@ const SignInForm = () => {
       form.reset();
       navigate("/");
     } else {
-      toast({ title: "Sign up failed. Please try again." });
+      toast({ title: "Sign in failed. Please try again." });
+      return;
     }
   };
 
@@ -65,7 +63,7 @@ const SignInForm = () => {
         </p>
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSignIn)}
           className="flex flex-col gap-5 w-full mt-4"
         >
           <FormField
@@ -95,7 +93,7 @@ const SignInForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isUserLoading ? (
+            {isPending || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader />
                 Loading ...

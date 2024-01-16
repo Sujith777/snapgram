@@ -29,7 +29,7 @@ const SignUpForm = () => {
 
   const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
     useCreateUserAccount();
-  const { mutateAsync: signInAccount, isPending: isSigningIn } =
+  const { mutateAsync: signInAccount, isPending: isSigningInUser } =
     useSignInAccount();
 
   const form = useForm<z.infer<typeof SignUpValidation>>({
@@ -42,8 +42,8 @@ const SignUpForm = () => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof SignUpValidation>) => {
-    const newUser = await createUserAccount(values);
+  const handleSignUp = async (user: z.infer<typeof SignUpValidation>) => {
+    const newUser = await createUserAccount(user);
     if (!newUser) {
       return toast({
         title: "Sign Up failed. Please try again.",
@@ -51,12 +51,14 @@ const SignUpForm = () => {
     }
 
     const session = await signInAccount({
-      email: values.email,
-      password: values.password,
+      email: user.email,
+      password: user.password,
     });
 
     if (!session) {
-      return toast({ title: "Sign in failed. Please try again." });
+      return toast({ title: "Something went wrong. Please try again." });
+      navigate("/sign-in");
+      return;
     }
 
     const isLoggedIn = await checkAuthUser();
@@ -65,6 +67,7 @@ const SignUpForm = () => {
       navigate("/");
     } else {
       toast({ title: "Sign up failed. Please try again." });
+      return;
     }
   };
 
@@ -80,7 +83,7 @@ const SignUpForm = () => {
         </p>
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSignUp)}
           className="flex flex-col gap-5 w-full mt-4"
         >
           <FormField
@@ -136,7 +139,7 @@ const SignUpForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isCreatingAccount ? (
+            {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader />
                 Loading ...
