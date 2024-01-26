@@ -52,7 +52,7 @@ export const AuthContextProvider = ({
       }
       return false;
     } catch (error) {
-      throw new Error(JSON.stringify(error));
+      console.log(error);
       return false;
     } finally {
       setIsLoading(false);
@@ -69,7 +69,7 @@ export const AuthContextProvider = ({
       navigate("/sign-in");
     }
     checkAuthUser();
-  }, []);
+  }, [navigate]);
 
   const value = {
     user,
@@ -83,6 +83,6 @@ export const AuthContextProvider = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export default AuthContextProvider;
-
 export const useUserContext = () => useContext(AuthContext);
+
+export default AuthContextProvider;

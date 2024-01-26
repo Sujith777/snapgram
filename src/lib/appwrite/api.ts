@@ -60,9 +60,19 @@ export async function signInAccount(user: { email: string; password: string }) {
   }
 }
 
-export async function getCurrentUser() {
+export async function getAccount() {
   try {
     const currentAccount = await account.get();
+
+    return currentAccount;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getCurrentUser() {
+  try {
+    const currentAccount = await getAccount();
     if (!currentAccount) {
       throw Error;
     }
@@ -285,7 +295,7 @@ export async function deletePost(postId: string, imageId: string) {
 }
 
 export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
-  const queries: string[] = [Query.orderDesc("$updatedAt"), Query.limit(10)];
+  const queries = [Query.orderDesc("$updatedAt"), Query.limit(10)];
   if (pageParam) {
     queries.push(Query.cursorAfter(pageParam.toString()));
   }
